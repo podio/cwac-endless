@@ -1,0 +1,14 @@
+
+bin/classes/com/commonsware/cwac/endless/BuildConfig.class
+
+bin/AndroidManifest.xml
+
+bin/classes/com/commonsware/cwac/endless/EndlessAdapter$AppendTask.class
+
+bin/classes/com/commonsware/cwac/endless/EndlessAdapter.class
+
+bin/endlessadapter.jar
+
+bin/jarlist.cache
+
+gen/com/commonsware/cwac/endless/BuildConfig.java
