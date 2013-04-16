@@ -26,6 +26,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
+import android.widget.ListView;
 
 import com.commonsware.cwac.adapter.AdapterWrapper;
 
@@ -61,9 +62,22 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 
 	private boolean reversedEndless;
 
+	private ListView listView;
+
 	/**
-	 * Constructor wrapping a supplied ListAdapter
+	 * Constructor wrapping a supplied ListAdapter. This also binds the ListView
+	 * with the adapter.
 	 */
+	public EndlessAdapter(ListAdapter wrapped, boolean reversedEndless, ListView listView) {
+		super(wrapped);
+		this.listView = listView;
+		this.reversedEndless = reversedEndless;
+		this.listView.setAdapter(this);
+		if (reversedEndless) {
+			listView.setSelection(getCount());
+		}
+	}
+
 	public EndlessAdapter(ListAdapter wrapped) {
 		super(wrapped);
 	}
@@ -110,6 +124,14 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 		this.context = context;
 		this.pendingResource = pendingResource;
 		this.keepOnAppending.set(keepOnAppending);
+	}
+
+	public ListView getListView() {
+		return listView;
+	}
+
+	public boolean isReversedEndless() {
+		return reversedEndless;
 	}
 
 	public boolean isSerialized() {
@@ -181,7 +203,9 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 				&& position == getWrappedAdapter().getCount()) {
 			return (IGNORE_ITEM_VIEW_TYPE);
 		}
-
+		if (reversedEndless && keepOnAppending.get()) {
+			position--;
+		}
 		return (super.getItemViewType(position));
 	}
 
@@ -198,10 +222,14 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 
 	@Override
 	public Object getItem(int position) {
-		if (reversedEndless && position == 0 || !reversedEndless && position >= super.getCount()) {
+		if (reversedEndless && position == 0 && keepOnAppending.get() || !reversedEndless
+				&& position >= super.getCount()) {
 			return (null);
 		}
 
+		if (reversedEndless && keepOnAppending.get()) {
+			position--;
+		}
 		return (super.getItem(position));
 	}
 
@@ -217,6 +245,9 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 			return (false);
 		}
 
+		if (reversedEndless && keepOnAppending.get()) {
+			position--;
+		}
 		return (super.isEnabled(position));
 	}
 
@@ -253,7 +284,9 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 
 			return (pendingView);
 		}
-
+		if (reversedEndless && keepOnAppending.get()) {
+			position--;
+		}
 		return (super.getView(position, convertView, parent));
 	}
 
@@ -294,9 +327,20 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	protected static class AppendTask extends AsyncTask<Void, Void, Exception> {
 		EndlessAdapter adapter = null;
 		boolean tempKeep;
+		private ListView listView;
+		private int preeCount;
 
 		protected AppendTask(EndlessAdapter adapter) {
 			this.adapter = adapter;
+			this.listView = adapter.getListView();
+		}
+
+		@Override
+		protected void onPreExecute() {
+			if (adapter.isReversedEndless()) {
+				preeCount = adapter.getCount();
+				listView.setSelection(preeCount);
+			}
 		}
 
 		@Override
@@ -323,6 +367,12 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 			}
 
 			adapter.onDataReady();
+
+			if (adapter.isReversedEndless()) {
+				int selectedPos = adapter.getCount() - preeCount;
+				listView.setSelection(selectedPos);
+
+			}
 		}
 	}
 
