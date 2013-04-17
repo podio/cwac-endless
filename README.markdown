@@ -1,5 +1,6 @@
 CWAC EndlessAdapter: It Just Keeps Going and Going And...
 =========================================================
+This forked version contains support for reversed scrolling.
 
 AJAX Web sites have sometimes taken up the "endless page"
 model, where scrolling automatically loads in new content,
