@@ -63,6 +63,7 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	private boolean reversedEndless;
 
 	private ListView listView;
+	private boolean initialize;
 
 	/**
 	 * Constructor wrapping a supplied ListAdapter. This also binds the ListView
@@ -70,11 +71,22 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	 */
 	public EndlessAdapter(ListAdapter wrapped, boolean reversedEndless, ListView listView) {
 		super(wrapped);
+		this.context = listView.getContext();
 		this.listView = listView;
 		this.reversedEndless = reversedEndless;
 		this.listView.setAdapter(this);
 		if (reversedEndless) {
-			listView.setSelection(getCount());
+			initialize = true;
+			listView.post(new Runnable() {
+
+				@Override
+				public void run() {
+					EndlessAdapter.this.listView.setSelection(EndlessAdapter.this.getCount() - 1);
+					initialize = false;
+					pendingView = null;
+				}
+			});
+
 		}
 	}
 
@@ -281,7 +293,11 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 					}
 				}
 			}
-
+			if (initialize) {
+				pendingView.setVisibility(View.GONE);
+			} else {
+				pendingView.setVisibility(View.VISIBLE);
+			}
 			return (pendingView);
 		}
 		if (reversedEndless && keepOnAppending.get()) {
@@ -312,10 +328,12 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 
 	@TargetApi(11)
 	private <T> void executeAsyncTask(AsyncTask<T, ?, ?> task, T... params) {
-		if (!isSerialized && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)) {
-			task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);
-		} else {
-			task.execute(params);
+		if (!initialize) {
+			if (!isSerialized && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)) {
+				task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);
+			} else {
+				task.execute(params);
+			}
 		}
 	}
 
@@ -339,7 +357,7 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 		protected void onPreExecute() {
 			if (adapter.isReversedEndless()) {
 				preeCount = adapter.getCount();
-				listView.setSelection(preeCount);
+				listView.setSelection(0);
 			}
 		}
 
