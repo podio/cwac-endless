@@ -77,6 +77,7 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 		this.listView.setAdapter(this);
 		if (reversedEndless) {
 			initialize = true;
+			EndlessAdapter.this.listView.setSelection(EndlessAdapter.this.getCount() - 1);
 			listView.post(new Runnable() {
 
 				@Override
