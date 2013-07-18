@@ -1,4 +1,5 @@
-
+bin
+gen
 bin/classes/com/commonsware/cwac/endless/BuildConfig.class
 
 bin/AndroidManifest.xml
