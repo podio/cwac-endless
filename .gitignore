@@ -13,3 +13,6 @@ bin/endlessadapter.jar
 bin/jarlist.cache
 
 gen/com/commonsware/cwac/endless/BuildConfig.java
+
+.settings
+
