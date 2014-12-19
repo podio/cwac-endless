@@ -64,6 +64,35 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 
 	private ListView listView;
 	private boolean initialize;
+	private PageState pageState;
+
+	public static class PageState {
+		private int pageSize;
+		private int sqliteTotalLimit;
+
+		public PageState(int pageSize){
+			this.pageSize = pageSize;
+			sqliteTotalLimit = this.pageSize;
+		}
+
+		public int getSqliteTotalLimit() {
+			return sqliteTotalLimit;
+		}
+
+		public void setSqliteTotalLimit(int sqliteTotalLimit) {
+			this.sqliteTotalLimit = sqliteTotalLimit;
+		}
+
+		public void resetSqliteTotalLimit() {
+			sqliteTotalLimit = pageSize;
+		}
+
+		@Override
+		public String toString() {
+			return "PageState [sqliteTotalLimit=" + sqliteTotalLimit + "]";
+		}
+
+	}
 
 	/**
 	 * Constructor wrapping a supplied ListAdapter. This also binds the ListView
@@ -421,5 +450,13 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	 */
 	protected Context getContext() {
 		return (context);
+	}
+
+	protected PageState getPageState() {
+		return pageState;
+	}
+
+	public void setPageState(PageState pageState) {
+		this.pageState = pageState;
 	}
 }
