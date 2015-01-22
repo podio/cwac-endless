@@ -16,3 +16,5 @@ gen/com/commonsware/cwac/endless/BuildConfig.java
 
 .settings
 
+# GRADLE
+build/
