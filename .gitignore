@@ -18,3 +18,4 @@ gen/com/commonsware/cwac/endless/BuildConfig.java
 
 # GRADLE
 build/
+*.iml
